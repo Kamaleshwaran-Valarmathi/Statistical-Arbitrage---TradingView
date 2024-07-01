@@ -1,0 +1,26 @@
+//@version=5
+indicator("HedgeRatio")
+
+var ticker1 = input.symbol("HDFCGOLD", "Ticker 1")
+var ticker2 = input.symbol("GOLDBEES", "Ticker 2")
+var num_bars = input.int(500, "No. of bar to calculate hedge ratio")
+
+var numerator = 0.0
+var denominator = 0.0
+var hedge_ratio = 0.0
+
+var bars_seen_so_far = 0
+cur_ticker1_price = request.security(ticker1, "", close)
+cur_ticker2_price = request.security(ticker2, "", close)
+
+if bars_seen_so_far < num_bars
+    numerator += (cur_ticker1_price * cur_ticker2_price)
+    denominator += (cur_ticker1_price * cur_ticker1_price)
+    bars_seen_so_far += 1
+
+if hedge_ratio == 0.0 and bars_seen_so_far == num_bars
+    hedge_ratio := numerator / denominator
+
+plot(hedge_ratio, color = color.white, title = "Hedge Ratio", precision = 5)
+plot(cur_ticker1_price, color = color.green, title = "Price 1")
+plot(cur_ticker2_price, color = color.red, title = "Price 2")

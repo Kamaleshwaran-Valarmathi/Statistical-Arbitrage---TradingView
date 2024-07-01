@@ -1,0 +1,42 @@
+//@version=5
+indicator("Spread")
+
+
+
+var ticker1 = input.symbol("HDFCGOLD", "Ticker 1")
+var ticker2 = input.symbol("AXISGOLD", "Ticker 2")
+var num_bars = input.int(500, "No. of bar to calculate hedge ratio")
+
+
+
+// ============= Hedge Ratio Calculation =============
+var numerator = 0.0
+var denominator = 0.0
+var float hedge_ratio = na
+
+var bars_seen_so_far = 0
+cur_ticker1_price = request.security(ticker1, "", close)
+cur_ticker2_price = request.security(ticker2, "", close)
+
+if bars_seen_so_far < num_bars
+    numerator += (cur_ticker1_price * cur_ticker2_price)
+    denominator += (cur_ticker1_price * cur_ticker1_price)
+    bars_seen_so_far += 1
+
+// Hedge ratio calculation
+if na(hedge_ratio) and bars_seen_so_far == num_bars
+    hedge_ratio := numerator / denominator
+
+plot(hedge_ratio, display = display.status_line, color = color.yellow, title = "Hedge Ratio", precision = 5)
+plot(cur_ticker1_price, display = display.status_line, color = color.green, title = "Price 1")
+plot(cur_ticker2_price, display = display.status_line, color = color.red, title = "Price 2")
+
+
+
+// ============= Spread Calculation =============
+float spread = na
+if not na(hedge_ratio)
+    spread := (cur_ticker1_price * hedge_ratio) - cur_ticker2_price
+
+plot(spread, color = color.white, title = "Spread", precision = 5)
+plot(0, display = display.pane, color = color.white, style = plot.style_circles)
